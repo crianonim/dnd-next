@@ -1,4 +1,5 @@
 import { z } from "zod";
+import * as roll from "./roll";
 
 const statSchema = z.number().int().positive();
 
@@ -14,8 +15,10 @@ type ActionType = z.infer<typeof actionTypeSchema>;
 const actionSchema = z.object({
   type: actionTypeSchema,
   toHit: z.number().int(),
-  onHit: z.number(),
+  onHit: roll.rollSchema,
 });
+
+type Action = z.infer<typeof actionSchema>;
 
 const statBlockSchema = z.object({
   name: z.string(),
@@ -27,7 +30,7 @@ const statBlockSchema = z.object({
   int: statSchema,
   wis: statSchema,
   cha: statSchema,
-  actions: z.array(actionTypeSchema),
+  actions: z.array(actionSchema),
 });
 
 type StatBlock = z.infer<typeof statBlockSchema>;
@@ -46,7 +49,12 @@ const exampleStatBlock: StatBlock = {
   int: 2,
   wis: 12,
   cha: 5,
-  actions: [],
+  actions: [{ type: "Weapon Melee Attack", toHit: 2, onHit: roll.fixed(1) }],
 };
 
-type InstanciatedStatBlock = z.infer<typeof instanceStatBlock>;
+export type InstanciatedStatBlock = z.infer<typeof instanceStatBlock>;
+
+export const instanciateStatBlock = (sb: StatBlock): InstanciatedStatBlock => ({
+  ...sb,
+  currentHp: sb.hp,
+});

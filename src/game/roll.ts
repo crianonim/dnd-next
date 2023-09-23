@@ -1,6 +1,12 @@
-import { count } from "console";
+import { z } from "zod";
 
-export type Roll = { die: number; count: number; mod: number };
+export const rollSchema = z.object({
+  die: z.number().int(),
+  count: z.number().int(),
+  mod: z.number().int(),
+});
+
+export type Roll = z.infer<typeof rollSchema>;
 
 export const rollDie = (n: number): number => Math.floor(Math.random() * n) + 1;
 
