@@ -31,3 +31,17 @@ export const rollToString = ({ count, die, mod }: Roll) =>
   "d" +
   die +
   (mod > 0 ? "+" + mod : mod < 0 ? "" + mod : "");
+
+export const parseRoll = (s: string): Roll => {
+  const [count, rest] = s.split("d");
+  if (!rest) return fixed(parseInt(count));
+  const [die, mod] = rest.split("+");
+  return {
+    count: parseInt(count),
+    die: parseInt(die.trim()),
+    mod: mod ? parseInt(mod.trim()) : 0,
+  };
+};
+
+export const averageRollResult = (r: Roll): number =>
+  Math.floor((r.die + 1) / 2) * r.count + r.mod;
