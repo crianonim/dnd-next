@@ -28,6 +28,9 @@ const monsterTypeSchema = z.union([
   z.literal("undead"),
   z.literal("swarm of Tiny beasts"),
 ]);
+export const allMonsterTypes = monsterTypeSchema.options.map((x) => x.value);
+
+export type MonsterType = z.infer<typeof monsterTypeSchema>;
 
 export const acSchema = z.array(
   z.object({

@@ -1,3 +1,4 @@
+import { Button, Space } from "antd";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -18,10 +19,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <nav className="flex gap-1 p-1 border">
-          <Link href="/roller">Roller</Link>
-          <Link href="/monster-list">Monsters</Link>
-        </nav>
+        <Space>
+          <Button type="link">
+            <Link href="/roller">Roller</Link>
+          </Button>
+          <Button type="link">
+            <Link href="/monster-list">Monsters</Link>
+          </Button>
+          <Button type="link">
+            <Link href="/arena">Arena</Link>
+          </Button>
+        </Space>
         {children}
       </body>
     </html>
