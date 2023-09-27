@@ -20,10 +20,10 @@ export const roll = (r: Roll): number =>
 
 export const d4 = (count = 1, mod = 0) => ({ die: 4, count, mod });
 export const d6 = (count = 1, mod = 0) => ({ die: 6, count, mod });
-export const d8 = (count = 1, mod = 0) => ({ die: 6, count, mod });
-export const d10 = (count = 1, mod = 0) => ({ die: 6, count, mod });
-export const d12 = (count = 1, mod = 0) => ({ die: 6, count, mod });
-export const d20 = (count = 1, mod = 0) => ({ die: 6, count, mod });
+export const d8 = (count = 1, mod = 0) => ({ die: 8, count, mod });
+export const d10 = (count = 1, mod = 0) => ({ die: 10, count, mod });
+export const d12 = (count = 1, mod = 0) => ({ die: 12, count, mod });
+export const d20 = (count = 1, mod = 0) => ({ die: 20, count, mod });
 export const fixed = (mod: number) => ({ die: 6, count: 0, mod });
 export const rollToString = ({ count, die, mod }: Roll) =>
   "" +

@@ -52,12 +52,14 @@ const damageTypeSchema = z.union([
   z.literal("Necrotic"),
   z.literal("Psychic"),
 ]);
+
+export type DamageType = z.infer<typeof damageTypeSchema>;
 const damageSchema = z.object({
   damage_type: z.object({ name: damageTypeSchema }),
   damage_dice: z.string(),
 });
 
-const attackActionSchema = z.object({
+export const attackActionSchema = z.object({
   name: z.string(),
   desc: z.string(),
   attack_bonus: z.number(),
@@ -65,6 +67,7 @@ const attackActionSchema = z.object({
 });
 
 export type AttackAction = z.infer<typeof attackActionSchema>;
+
 export const isAttackAction = (a: Action): a is AttackAction => {
   return "attack_bonus" in a;
 };
@@ -115,4 +118,42 @@ export const alignments = _.uniq(
   )
 );
 
+export const getMonsterByName = (name: string): Monster =>
+  monsters.find((x) => x.name === name) || thug;
+
 export const calculateMod = (x: number) => Math.floor((x - 10) / 2);
+
+export const thug: Monster = {
+  name: "Thug",
+  type: "humanoid",
+  alignment: "any non-good alignment",
+  size: "Medium",
+  armor_class: [{ type: "armor", value: 11 }],
+  hit_points: 32,
+  hit_dice: "5d8",
+  hit_points_roll: "5d8+10",
+  speed: { walk: "30 ft." },
+  strength: 15,
+  dexterity: 11,
+  constitution: 14,
+  intelligence: 10,
+  wisdom: 10,
+  charisma: 11,
+  challenge_rating: 0.5,
+  xp: 100,
+  actions: [
+    { name: "Multiattack", desc: "The thug makes two melee attacks." },
+    {
+      name: "Mace",
+      desc: "Melee Weapon Attack: +4 to hit, reach 5 ft., one creature. Hit: 5 (1d6 + 2) bludgeoning damage.",
+      attack_bonus: 4,
+      damage: [{ damage_type: { name: "Bludgeoning" }, damage_dice: "1d6+2" }],
+    },
+    {
+      name: "Heavy Crossbow",
+      desc: "Ranged Weapon Attack: +2 to hit, range 100/400 ft., one target. Hit: 5 (1d10) piercing damage.",
+      attack_bonus: 2,
+      damage: [{ damage_type: { name: "Piercing" }, damage_dice: "1d10" }],
+    },
+  ],
+};
