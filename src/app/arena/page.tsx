@@ -21,12 +21,21 @@ function EntityView({
   onAttackAction: (a: AttackAction) => void;
 }) {
   return (
-    <div className="gap-1 flex flex-col text-sm border rounded shadow p-1">
+    <div
+      className={
+        "gap-1 flex flex-col text-sm border rounded shadow p-1 " +
+        (entity.state == "active"
+          ? "bg-white"
+          : "bg-slate-700 text-white opacity-50")
+      }
+    >
       <div className="flex gap-1 justify-between">
         {" "}
         <span
           className="font-bold cursor-pointer"
-          onClick={() => onClick(entity.name)}
+          onClick={() =>
+            entity.state === "active" ? onClick(entity.name) : undefined
+          }
         >
           {entity.name}
         </span>
@@ -35,15 +44,16 @@ function EntityView({
         </span>
       </div>
       <div className="flex gap-1">
-        {entity.attacks.map((attack) => (
-          <div
-            className=" bg-slate-200 border rounded-sm cursor-pointer"
-            key={attack.name}
-            onClick={() => onAttackAction(attack)}
-          >
-            {attack.name}
-          </div>
-        ))}
+        {entity.state == "active" &&
+          entity.attacks.map((attack) => (
+            <div
+              className=" bg-slate-200 border rounded-sm cursor-pointer"
+              key={attack.name}
+              onClick={() => onAttackAction(attack)}
+            >
+              {attack.name}
+            </div>
+          ))}
       </div>
     </div>
   );
@@ -66,7 +76,7 @@ export default function Arena() {
       <div className="flex flex-col gap-1 w-40">
         <div>
           {defenderEntity && (
-            <div className="flex flex-col gap-1 border rounded bg-red-300 p-1">
+            <div className="flex flex-col gap-1 border rounded border-red-500 p-1">
               <div className="text-small">Defender</div>
               <EntityView
                 entity={defenderEntity}
@@ -85,7 +95,7 @@ export default function Arena() {
               onClick={setDefender}
               onAttackAction={(a) => {
                 console.log({ a }, defenderEntity);
-                if (defenderEntity) {
+                if (defenderEntity && e.state === "active") {
                   const result = attackEntity(defenderEntity, a);
                   setResult(result);
                   if (result.type === "success") {

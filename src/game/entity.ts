@@ -10,8 +10,13 @@ import {
 import _ from "lodash";
 import * as roll from "./roll";
 
+const entityStateSchema = z.union([z.literal("active"), z.literal("dead")]);
+
+export type EntityState = z.infer<typeof entityStateSchema>;
+
 const entitySchema = z.object({
   name: z.string(),
+  state: entityStateSchema,
   maxHP: z.number().int(),
   ac: z.number().int(),
   currentHP: z.number().int(),
@@ -25,6 +30,7 @@ export const spawnMonster = (m: Monster, id: string): Entity => {
   const hp = roll.roll(roll.parseRoll(m.hit_points_roll));
   return {
     name: generateMonsterName(m, id),
+    state: "active",
     maxHP: hp,
     currentHP: hp,
     // todo - multiple acs
@@ -92,4 +98,8 @@ export const attackResultToString = (result: AttackResult): string =>
 export const applyDamage = (result: AttackResult, defender: Entity): Entity =>
   result.type === "failure"
     ? defender
-    : { ...defender, currentHP: defender.currentHP - result.damageTotal };
+    : {
+        ...defender,
+        currentHP: defender.currentHP - result.damageTotal,
+        state: defender.currentHP - result.damageTotal > 0 ? "active" : "dead",
+      };
