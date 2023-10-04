@@ -4,8 +4,10 @@ import {
   DamageType,
   Monster,
   attackActionSchema,
+  calculateMod,
   getMonsterByName,
   isAttackAction,
+  monsterSchema,
 } from "./monsters";
 import _ from "lodash";
 import * as roll from "./roll";
@@ -22,6 +24,7 @@ const entitySchema = z.object({
   currentHP: z.number().int(),
   monsterName: z.string(),
   attacks: z.array(attackActionSchema),
+  monster: monsterSchema,
 });
 
 const generateMonsterName = (m: Monster, id: string): string => m.name + id;
@@ -37,6 +40,7 @@ export const spawnMonster = (m: Monster, id: string): Entity => {
     ac: m.armor_class.reduce((acc, cur) => Math.max(cur.value, acc), 0),
     monsterName: m.name,
     attacks: m.actions ? m.actions.filter(isAttackAction) : [],
+    monster: m,
   };
 };
 export type Entity = z.infer<typeof entitySchema>;
@@ -45,6 +49,26 @@ export const generateEntities: () => Entity[] = () =>
   ["Cultist", "Bandit", "Gnoll", "Bat", "Orc", "Orc", "Orc"]
     .map(getMonsterByName)
     .map((m, i) => spawnMonster(m, "_" + i));
+
+const teamSchema = z.union([z.literal("red"), z.literal("blue")]);
+
+export type Team = z.infer<typeof teamSchema>;
+
+export const combatantSchema = z.object({
+  entity: entitySchema,
+  hasActed: z.boolean(),
+  initiative: z.number(),
+  team: teamSchema,
+});
+
+export type Combatant = z.infer<typeof combatantSchema>;
+
+export const enterCombat = (entity: Entity, team: Team): Combatant => ({
+  entity,
+  team,
+  hasActed: false,
+  initiative: calculateMod(entity.monster.dexterity) + roll.roll(roll.d20()),
+});
 
 export type AttackResult =
   | { type: "failure"; attackTotal: number }
