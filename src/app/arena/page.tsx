@@ -1,74 +1,25 @@
 "use client";
 import {
-  Entity,
-  generateEntities,
-  attackEntity,
   AttackResult,
-  attackResultToString,
-  applyDamage,
   Combatant,
+  Team,
+  attackResultToString,
   enterCombat,
-} from "@/game/entity";
+} from "@/game/arena";
+import { Entity, generateEntities } from "@/game/entity";
 import { AttackAction } from "@/game/monsters";
+import { useStore } from "@/store/arenaStore";
 import _ from "lodash";
 
 import React, { useEffect, useMemo, useState } from "react";
-
-function EntityView({
-  entity,
-  onClick,
-  onAttackAction,
-}: {
-  entity: Entity;
-  onClick: (e: string) => void;
-  onAttackAction: (a: AttackAction) => void;
-}) {
-  return (
-    <div
-      className={
-        "gap-1 flex flex-col text-sm border rounded shadow p-1 " +
-        (entity.state == "active"
-          ? "bg-white"
-          : "bg-slate-700 text-white opacity-50")
-      }
-    >
-      <div className="flex gap-1 justify-between">
-        {" "}
-        <span
-          className="font-bold cursor-pointer"
-          onClick={() =>
-            entity.state === "active" ? onClick(entity.name) : undefined
-          }
-        >
-          {entity.name}
-        </span>
-        <span>
-          {entity.currentHP}/{entity.maxHP}
-        </span>
-      </div>
-      <div className="flex gap-1">
-        {entity.state == "active" &&
-          entity.attacks.map((attack) => (
-            <div
-              className=" bg-slate-200 border rounded-sm cursor-pointer"
-              key={attack.name}
-              onClick={() => onAttackAction(attack)}
-            >
-              {attack.name}
-            </div>
-          ))}
-      </div>
-    </div>
-  );
-}
 
 function CombatantViewMini({ combatant }: { combatant: Combatant }) {
   return (
     <div
       className={
-        "gap-1 flex flex-col text-sm border rounded shadow p-1 " +
+        "gap-1 flex flex-col text-sm p-1 " +
         (combatant.entity.state == "active"
-          ? "bg-white"
+          ? "bg-inherit"
           : "bg-slate-700 text-white opacity-50")
       }
     >
@@ -86,177 +37,133 @@ function CombatantViewMini({ combatant }: { combatant: Combatant }) {
   );
 }
 
-const getEntityByName = (
-  name: string,
-  entities: Entity[]
-): Entity | undefined => entities.find((e) => e.name === name);
-
-const nextCombatant = (combatants: Combatant[], current: string): string => {
-  const index = combatants.findIndex((c) => c.entity.name === current) + 1;
-  const newIndex = index >= combatants.length ? 0 : index;
-  const newCurrent: Combatant = combatants[newIndex];
-  console.log(newCurrent.entity.name);
-  return newCurrent.entity.name;
-};
 export default function Arena() {
-  const [defender, setDefender] = useState<string | null>(null);
-  const [entities, setEntities] = useState<Entity[]>([]);
-  const [combatants, setCombatants] = useState<Combatant[]>([]);
-  const [current, setCurrent] = useState<string | null>(null);
+  const { arena, nextCombatant, initArena, attack } = useStore();
+  const { round, combatants, queue, current } = arena;
   const [attackAction, setAttackAction] = useState<AttackAction | null>(null);
-  console.log({ combatants }, { entities });
-  const [result, setResult] = useState<AttackResult | null>(null);
-  useEffect(() => setEntities(generateEntities()), []);
+  const [result, setResult] = useState<AttackResult | undefined>();
+  const currentCombatant =
+    current !== undefined ? combatants[current] : undefined;
+  const currentTeam = currentCombatant?.team;
+  const oppositeTeam = currentTeam
+    ? currentTeam === "red"
+      ? "blue"
+      : "red"
+    : undefined;
   useEffect(() => {
-    const combatants = entities.map((e) =>
-      enterCombat(
-        e,
-        ["Gnoll_4", "Cultist_0", "Bandit_1"].includes(e.name) ? "red" : "blue"
-      )
+    const [reds, blues] = _.partition(generateEntities(), (e) =>
+      ["Gnoll_4", "Cultist_0", "Bandit_1"].includes(e.name)
     );
-    setCombatants(combatants);
-    setCurrent(
-      _.sortBy(combatants, "initiative").toReversed()[0]?.entity.name || null
-    );
-  }, [entities]);
-  const defenderEntity = defender && getEntityByName(defender, entities);
-  const queue: Combatant[] = useMemo(
-    () =>
-      _.sortBy(
-        combatants.filter((c) => c.entity.state === "active"),
-        "initiative"
-      ).toReversed(),
-    [combatants]
-  );
-  const currentCombatant: Combatant | null = useMemo(
-    () => combatants.find((c) => c.entity.name === current) || null,
-    [current]
-  );
-  console.log({ attackAction });
-  return (
-    <div className="flex flex-col">
-      <div className="flex gap-4">
-        <div className="flex flex-col gap-1 w-40">
-          <div className="text-sm ">
-            {result && attackResultToString(result)}
-          </div>
-          <div>
-            {defenderEntity && (
-              <div className="flex flex-col gap-1 border rounded border-red-500 p-1">
-                <div className="text-small">Defender</div>
-                <EntityView
-                  entity={defenderEntity}
-                  onClick={() => {}}
-                  onAttackAction={() => {}}
-                />
-              </div>
-            )}
-          </div>
-          {entities
-            .filter((ent) => ent !== defenderEntity)
-            .map((e) => (
-              <EntityView
-                key={e.name}
-                entity={e}
-                onClick={setDefender}
-                onAttackAction={(a) => {
-                  console.log({ a }, defenderEntity);
-                  if (defenderEntity && e.state === "active") {
-                    const result = attackEntity(defenderEntity, a);
-                    setResult(result);
-                    if (result.type === "success") {
-                      const newDefender = applyDamage(result, defenderEntity);
-                      console.log("IN DAMAGE", newDefender);
-                      setEntities((prev) =>
-                        prev.map((d) =>
-                          d.name === newDefender.name ? newDefender : d
-                        )
-                      );
-                    }
-                  }
-                }}
-              />
-            ))}
-        </div>
-        <div className="flex flex-col gap-1 w-40 border border-red-400">
-          <div>
-            {combatants
-              .filter((c) => c.team == "red")
-              .map((c) => (
-                <div
-                  key={c.entity.name}
-                  onClick={() => {
-                    if (attackAction) {
-                      const result = attackEntity(c.entity, attackAction);
-                      setResult(result);
-                      if (result.type === "success") {
-                        const newDefender = applyDamage(result, c.entity);
-                        console.log("IN DAMAGE", newDefender);
-                        setEntities((prev) =>
-                          prev.map((d) =>
-                            d.name === newDefender.name ? newDefender : d
-                          )
-                        );
-                      }
-                      if (current) setCurrent(nextCombatant(queue, current));
+    initArena(reds, blues);
+  }, []);
 
-                      setAttackAction(null);
-                    }
-                  }}
-                >
-                  <CombatantViewMini combatant={c} />
-                </div>
-              ))}
-          </div>
-        </div>
-        <div className="flex flex-col gap-1 w-40 border border-blue-400">
-          <div>
-            {combatants
-              .filter((c) => c.team == "blue")
-              .map((c) => (
-                <CombatantViewMini key={c.entity.name} combatant={c} />
-              ))}
-          </div>
-        </div>
-        <div className="flex flex-col gap-1 border">
-          <div>
-            <button
-              onClick={() => {
-                if (current) setCurrent(nextCombatant(queue, current));
-              }}
-            >
-              Skip turn
-            </button>
-            {currentCombatant &&
-              currentCombatant.entity.attacks.map((attack) => (
-                <div
-                  className={
-                    " bg-slate-200 border rounded-sm cursor-pointer " +
-                    (attack.name === attackAction?.name
-                      ? "border-2 border-black"
-                      : "")
-                  }
-                  key={attack.name}
-                  onClick={() => setAttackAction(attack)}
-                >
-                  {attack.name}
-                </div>
-              ))}
-          </div>
-        </div>
-      </div>
-      <div className="flex gap-2 border-2 border-black p-2">
-        {queue.map((c) => (
+  const teamView = (team: Team) => (
+    <div
+      className={
+        "flex flex-col gap-1 p-1 " +
+        (attackAction && team === currentTeam ? "opacity-50" : "opacity-100")
+      }
+    >
+      {Object.values(combatants)
+        .filter((c) => c.team == team)
+        .map((c) => (
           <div
             className={
-              "w-20 border text-xs h-20 " +
-              (c.entity.name === current ? "bg-red-300" : "bg-white")
+              "cursor-pointer border shadow " +
+              (c.entity.name === current ? " border-black" : "")
             }
             key={c.entity.name}
+            onClick={() => {
+              if (
+                attackAction &&
+                oppositeTeam === team &&
+                c.entity.state !== "dead"
+              ) {
+                const result = attack(arena, c.entity.name, attackAction);
+                setResult(result);
+                setAttackAction(null);
+              }
+            }}
           >
-            {c.entity.name}
+            <CombatantViewMini combatant={c} />
+            {c.entity.name === current && currentCombatant ? (
+              <div className="flex flex-col gap-1 border text-sm">
+                <div className="flex flex-col gap-1 p-1 ">
+                  <button
+                    onClick={() => {
+                      nextCombatant();
+                      setAttackAction(null);
+                    }}
+                    className="border rounded-sm cursor-pointer p-1"
+                  >
+                    Skip turn
+                  </button>
+                  {currentCombatant &&
+                    currentCombatant.entity.attacks.map((attack) => (
+                      <div
+                        className={
+                          "border flex justify-center rounded-sm cursor-pointer p-1 " +
+                          (attack.name === attackAction?.name
+                            ? "border-2 border-black"
+                            : "")
+                        }
+                        key={attack.name}
+                        onClick={() => setAttackAction(attack)}
+                      >
+                        {attack.name}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ) : (
+              ""
+            )}
           </div>
         ))}
+    </div>
+  );
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 w-full">
+        <div> Round: {round}</div>
+        <div className="text-sm h-5">
+          {result && attackResultToString(result)}
+        </div>
+      </div>
+      <div className="flex gap-4 justify-between">
+        <div className="flex flex-col gap-1 grow border border-red-400">
+          {teamView("red")}
+        </div>
+        <div className="flex flex-col gap-1 grow border border-blue-400">
+          {teamView("blue")}
+        </div>
+      </div>
+      <div className="flex gap-2 border-2 border-black p-2 overflow-hidden">
+        {}
+        {queue
+          .slice(queue.findIndex((e) => e == current))
+          .concat([
+            "New Round",
+            ...queue.slice(
+              0,
+              queue.findIndex((e) => e == current)
+            ),
+          ])
+          .map((c) => (
+            <div
+              className={
+                "w-20 p-1 border-2 text-xs " +
+                (c === current
+                  ? currentTeam == "red"
+                    ? "border-red-300 font-bold"
+                    : "border-blue-300 font-bold"
+                  : "")
+              }
+              key={c}
+            >
+              {c}
+            </div>
+          ))}
       </div>
     </div>
   );

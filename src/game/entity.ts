@@ -12,11 +12,14 @@ import {
 import _ from "lodash";
 import * as roll from "./roll";
 
-const entityStateSchema = z.union([z.literal("active"), z.literal("dead")]);
+export const entityStateSchema = z.union([
+  z.literal("active"),
+  z.literal("dead"),
+]);
 
 export type EntityState = z.infer<typeof entityStateSchema>;
 
-const entitySchema = z.object({
+export const entitySchema = z.object({
   name: z.string(),
   state: entityStateSchema,
   maxHP: z.number().int(),
@@ -49,81 +52,3 @@ export const generateEntities: () => Entity[] = () =>
   ["Cultist", "Bandit", "Gnoll", "Bat", "Orc", "Orc", "Orc"]
     .map(getMonsterByName)
     .map((m, i) => spawnMonster(m, "_" + i));
-
-const teamSchema = z.union([z.literal("red"), z.literal("blue")]);
-
-export type Team = z.infer<typeof teamSchema>;
-
-export const combatantSchema = z.object({
-  entity: entitySchema,
-  hasActed: z.boolean(),
-  initiative: z.number(),
-  team: teamSchema,
-});
-
-export type Combatant = z.infer<typeof combatantSchema>;
-
-export const enterCombat = (entity: Entity, team: Team): Combatant => ({
-  entity,
-  team,
-  hasActed: false,
-  initiative: calculateMod(entity.monster.dexterity) + roll.roll(roll.d20()),
-});
-
-export type AttackResult =
-  | { type: "failure"; attackTotal: number }
-  | {
-      type: "success";
-      attackTotal: number;
-      damageTotal: number;
-      damageDetails: [number, DamageType][];
-    };
-
-export const attackEntity = (
-  defender: Entity,
-  attackAction: AttackAction
-): AttackResult => {
-  const attackRoll = roll.roll(roll.d20());
-  const attackTotal = attackRoll + attackAction.attack_bonus;
-  const success = attackTotal >= defender.ac;
-
-  if (!success) {
-    console.log(
-      `Attack ${attackTotal} (${attackRoll} + ${attackAction.attack_bonus}) against AC ${defender.ac} failed`
-    );
-    return {
-      type: "failure",
-      attackTotal,
-    };
-  }
-  const damageDetails: [number, DamageType][] = attackAction.damage.map(
-    (dam) => [roll.roll(roll.parseRoll(dam.damage_dice)), dam.damage_type.name]
-  );
-  const damageTotal = damageDetails.reduce(
-    (acc, cur: [number, DamageType]) => cur[0] + acc,
-    0
-  );
-
-  console.log(
-    `Attack ${attackTotal} (${attackRoll} + ${
-      attackAction.attack_bonus
-    }) against AC ${defender.ac} ${
-      success ? ` succeeded and dealt ${damageTotal} dmg ` : " failed"
-    }`
-  );
-  return { type: "success", attackTotal, damageTotal, damageDetails };
-};
-
-export const attackResultToString = (result: AttackResult): string =>
-  result.type === "success"
-    ? `Attack roll ${result.attackTotal} was successful and dealt ${result.damageTotal} damage.`
-    : `Attack roll ${result.attackTotal} was unsuccessful`;
-
-export const applyDamage = (result: AttackResult, defender: Entity): Entity =>
-  result.type === "failure"
-    ? defender
-    : {
-        ...defender,
-        currentHP: defender.currentHP - result.damageTotal,
-        state: defender.currentHP - result.damageTotal > 0 ? "active" : "dead",
-      };
