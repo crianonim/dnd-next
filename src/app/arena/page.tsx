@@ -9,6 +9,7 @@ import {
 import { Entity, generateEntities } from "@/game/entity";
 import { AttackAction } from "@/game/monsters";
 import { useStore } from "@/store/arenaStore";
+import { AnimatePresence, motion } from "framer-motion";
 import _ from "lodash";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -42,6 +43,26 @@ export default function Arena() {
   const { round, combatants, queue, current } = arena;
   const [attackAction, setAttackAction] = useState<AttackAction | null>(null);
   const [result, setResult] = useState<AttackResult | undefined>();
+  const [visibleQueue, setVisibleQueue] = useState(
+    queue.slice(queue.findIndex((e) => e == current)).concat([
+      "New Round",
+      ...queue.slice(
+        0,
+        queue.findIndex((e) => e == current)
+      ),
+    ])
+  );
+  useEffect(() => {
+    setVisibleQueue(
+      queue.slice(queue.findIndex((e) => e == current)).concat([
+        "New Round",
+        ...queue.slice(
+          0,
+          queue.findIndex((e) => e == current)
+        ),
+      ])
+    );
+  }, [current, queue]);
   const currentCombatant =
     current !== undefined ? combatants[current] : undefined;
   const currentTeam = currentCombatant?.team;
@@ -130,6 +151,44 @@ export default function Arena() {
           {result && attackResultToString(result)}
         </div>
       </div>
+      <div>
+        <motion.ul
+          layoutId={"list"}
+          className={
+            "flex gap-2 border border-black p-2 overflow-auto items-center"
+          }
+        >
+          <AnimatePresence initial={false}>
+            {visibleQueue.map((c) => (
+              <motion.li
+                transition={{
+                  duration: 1,
+                }}
+                layout
+                key={c}
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div
+                  className={
+                    "w-20 p-1 border-2 text-xs " +
+                    (c === current
+                      ? currentTeam == "red"
+                        ? "border-red-300 font-bold border-4"
+                        : "border-blue-300 font-bold border-4"
+                      : "")
+                  }
+                  key={c}
+                >
+                  {c}
+                </div>
+              </motion.li>
+            ))}
+          </AnimatePresence>
+          {/* </Reorder.Group> */}
+        </motion.ul>
+      </div>
       <div className="flex gap-4 justify-between">
         <div className="flex flex-col gap-1 grow border border-red-400">
           {teamView("red")}
@@ -137,33 +196,6 @@ export default function Arena() {
         <div className="flex flex-col gap-1 grow border border-blue-400">
           {teamView("blue")}
         </div>
-      </div>
-      <div className="flex gap-2 border-2 border-black p-2 overflow-hidden">
-        {}
-        {queue
-          .slice(queue.findIndex((e) => e == current))
-          .concat([
-            "New Round",
-            ...queue.slice(
-              0,
-              queue.findIndex((e) => e == current)
-            ),
-          ])
-          .map((c) => (
-            <div
-              className={
-                "w-20 p-1 border-2 text-xs " +
-                (c === current
-                  ? currentTeam == "red"
-                    ? "border-red-300 font-bold"
-                    : "border-blue-300 font-bold"
-                  : "")
-              }
-              key={c}
-            >
-              {c}
-            </div>
-          ))}
       </div>
     </div>
   );
