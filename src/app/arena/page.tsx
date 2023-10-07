@@ -107,38 +107,6 @@ export default function Arena() {
             }}
           >
             <CombatantViewMini combatant={c} />
-            {c.entity.name === current && currentCombatant ? (
-              <div className="flex flex-col gap-1 border text-sm">
-                <div className="flex flex-col gap-1 p-1 ">
-                  <button
-                    onClick={() => {
-                      nextCombatant();
-                      setAttackAction(null);
-                    }}
-                    className="border rounded-sm cursor-pointer p-1"
-                  >
-                    Skip turn
-                  </button>
-                  {currentCombatant &&
-                    currentCombatant.entity.attacks.map((attack) => (
-                      <div
-                        className={
-                          "border flex justify-center rounded-sm cursor-pointer p-1 " +
-                          (attack.name === attackAction?.name
-                            ? "border-2 border-black"
-                            : "")
-                        }
-                        key={attack.name}
-                        onClick={() => setAttackAction(attack)}
-                      >
-                        {attack.name}
-                      </div>
-                    ))}
-                </div>
-              </div>
-            ) : (
-              ""
-            )}
           </div>
         ))}
     </div>
@@ -188,6 +156,33 @@ export default function Arena() {
           </AnimatePresence>
           {/* </Reorder.Group> */}
         </motion.ul>
+      </div>
+
+      <div className="flex flex-col gap-1 border text-sm">
+        <div className="flex  gap-1 p-1 ">
+          {currentCombatant &&
+            currentCombatant.entity.attacks.map((attack) => (
+              <div
+                className={
+                  "border flex justify-center rounded-sm cursor-pointer p-1 " +
+                  (attack.name === attackAction?.name ? " border-black" : "")
+                }
+                key={attack.name}
+                onClick={() => setAttackAction(attack)}
+              >
+                {attack.name}
+              </div>
+            ))}
+          <button
+            onClick={() => {
+              nextCombatant();
+              setAttackAction(null);
+            }}
+            className="border rounded-sm cursor-pointer p-1"
+          >
+            Skip turn
+          </button>
+        </div>
       </div>
       <div className="flex gap-4 justify-between">
         <div className="flex flex-col gap-1 grow border border-red-400">
