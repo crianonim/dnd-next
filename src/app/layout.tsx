@@ -27,6 +27,9 @@ export default function RootLayout({
             <Link href="/monster-list">Monsters</Link>
           </Button>
           <Button type="link">
+            <Link href="/entities">Entities</Link>
+          </Button>
+          <Button type="link">
             <Link href="/arena">Arena</Link>
           </Button>
         </Space>
