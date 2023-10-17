@@ -5,8 +5,8 @@ import {
   AttackResult,
   attack,
 } from "@/game/arena";
-import { Entity } from "@/game/entity";
-import { AttackAction } from "@/game/monsters";
+import { Entity, spawnMonster } from "@/game/entity";
+import { AttackAction, Monster } from "@/game/monsters";
 import _ from "lodash";
 import { create } from "zustand";
 
@@ -21,6 +21,7 @@ type Actions = {
   ) => AttackResult | undefined;
   // Entities Actions
   setEntities: (entities: Entity[]) => void;
+  spawnMonster: (monster: Monster) => void;
 };
 
 export const useStore = create<{ arena: Arena; entities: Entity[] } & Actions>(
@@ -41,5 +42,10 @@ export const useStore = create<{ arena: Arena; entities: Entity[] } & Actions>(
       return result;
     },
     setEntities: (entities: Entity[]) => set(() => ({ entities })),
+    spawnMonster: (monster: Monster) =>
+      set(({ entities }) => {
+        const newMonster = spawnMonster(monster, "_" + entities.length);
+        return { entities: [...entities, newMonster] };
+      }),
   })
 );

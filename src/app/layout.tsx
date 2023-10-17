@@ -21,6 +21,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <Space>
           <Button type="link">
+            <Link href="/">Home</Link>
+          </Button>
+          <Button type="link">
             <Link href="/roller">Roller</Link>
           </Button>
           <Button type="link">
