@@ -10,23 +10,8 @@ import { Entity, generateEntities } from "@/game/entity";
 import { AttackAction } from "@/game/monsters";
 import { AnimatePresence, motion } from "framer-motion";
 import _ from "lodash";
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-
-const EntityMiniView = ({
-  entity,
-  setDragged,
-}: {
-  entity: Entity;
-  setDragged: Dispatch<SetStateAction<string | null>>;
-}) => (
-  <div
-    className="border p-1 rounded"
-    draggable
-    onDragStart={() => setDragged(entity.name)}
-  >
-    {entity.name}
-  </div>
-);
+import { useEffect, useMemo, useState } from "react";
+import EntityMiniView from "../components/entityMini";
 
 const EntitiesSetup = () => {
   const [entities, setEntities] = useState<Entity[]>([]);
@@ -65,11 +50,13 @@ const EntitiesSetup = () => {
           .map(
             (e) =>
               e && (
-                <EntityMiniView
+                <div
                   key={e.name}
-                  setDragged={setDragged}
-                  entity={e}
-                />
+                  draggable
+                  onDragStart={() => setDragged(e.name)}
+                >
+                  <EntityMiniView entity={e} />
+                </div>
               )
           )}
       </div>
@@ -93,11 +80,13 @@ const EntitiesSetup = () => {
           .map(
             (e) =>
               e && (
-                <EntityMiniView
+                <div
                   key={e.name}
-                  setDragged={setDragged}
-                  entity={e}
-                />
+                  draggable
+                  onDragStart={() => setDragged(e.name)}
+                >
+                  <EntityMiniView entity={e} />
+                </div>
               )
           )}
       </div>
@@ -120,11 +109,13 @@ const EntitiesSetup = () => {
           .map(
             (e) =>
               e && (
-                <EntityMiniView
+                <div
                   key={e.name}
-                  setDragged={setDragged}
-                  entity={e}
-                />
+                  draggable
+                  onDragStart={() => setDragged(e.name)}
+                >
+                  <EntityMiniView entity={e} />
+                </div>
               )
           )}
       </div>

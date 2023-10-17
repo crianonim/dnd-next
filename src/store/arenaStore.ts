@@ -11,6 +11,7 @@ import _ from "lodash";
 import { create } from "zustand";
 
 type Actions = {
+  // ArenaActions
   nextCombatant: () => void;
   initArena: (reds: Entity[], blues: Entity[]) => void;
   attack: (
@@ -19,6 +20,7 @@ type Actions = {
     attackAction: AttackAction
   ) => AttackResult | undefined;
 };
+
 export const useStore = create<{ arena: Arena } & Actions>((set) => ({
   arena: {
     combatants: {},

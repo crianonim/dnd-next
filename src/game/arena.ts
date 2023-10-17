@@ -77,6 +77,8 @@ export const currentTeam = (
 ): Team | undefined =>
   current !== undefined ? combatants[current].team : undefined;
 
+export const oppositeTeam = (t: Team) => (t === "red" ? "blue" : "red");
+
 export type AttackResult =
   | { type: "failure"; attackTotal: number }
   | {
