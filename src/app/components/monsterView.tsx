@@ -70,7 +70,7 @@ const showAction = (a: Action) => (
 
 export default function MonsterView({ monster }: MonsterViewProps) {
   return (
-    <div className="flex flex-col border p-2 w-[500px]">
+    <div className="flex flex-col border p-2">
       <div className="font-bold text-lg text-amber-900">{monster.name}</div>
       <div className="italic">
         {monster.size} {monster.type}, {monster.alignment}

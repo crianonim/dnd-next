@@ -57,8 +57,8 @@ const EntitiesSetup = () => {
             className="w-40 border border-blue-500 p-1"
             onDrop={() => {
               if (dragged && !blues.includes(dragged)) {
-                setBlues([...reds, dragged]);
-                setReds(blues.filter((e) => e !== dragged));
+                setBlues([...blues, dragged]);
+                setReds(reds.filter((e) => e !== dragged));
               }
             }}
             onDragOver={(event) => {
