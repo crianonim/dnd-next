@@ -19,24 +19,27 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Space>
-          <Button type="link">
-            <Link href="/">Home</Link>
-          </Button>
-          <Button type="link">
-            <Link href="/roller">Roller</Link>
-          </Button>
-          <Button type="link">
-            <Link href="/monster-list">Monsters</Link>
-          </Button>
-          <Button type="link">
-            <Link href="/entities">Entities</Link>
-          </Button>
-          <Button type="link">
-            <Link href="/arena">Arena</Link>
-          </Button>
-        </Space>
-        {children}
+        <div className="max-w-[800px] m-auto">
+          <Space>
+            <Button type="link">
+              <Link href="/">Home</Link>
+            </Button>
+            <Button type="link">
+              <Link href="/roller">Roller</Link>
+            </Button>
+            <Button type="link">
+              <Link href="/monster-list">Monsters</Link>
+            </Button>
+            <Button type="link">
+              <Link href="/entities">Entities</Link>
+            </Button>
+            <Button type="link">
+              <Link href="/arena">Arena</Link>
+            </Button>
+          </Space>
+
+          {children}
+        </div>
       </body>
     </html>
   );
