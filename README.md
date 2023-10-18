@@ -45,10 +45,10 @@ gcloud builds submit --tag gcr.io/encoded-silo-401007/dnd-docker --project encod
 
 ### On Artifact Registy
 
-Build locally:
+Build locally (adding platform swith if on Mac):
 
 ```
-docker build -t dnd-docker .
+docker build --platform linux/amd64 -t dnd-docker .
 ```
 
 Tag the locally build image
