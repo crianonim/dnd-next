@@ -34,3 +34,31 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## Deploy on GCP
+
+### On Container registry (`encoded-silo-401007` project and `dnd-docker` image name)
+
+```
+gcloud builds submit --tag gcr.io/encoded-silo-401007/dnd-docker --project encoded-silo-401007
+```
+
+### On Artifact Registy
+
+Build locally:
+
+```
+docker build -t dnd-docker .
+```
+
+Tag the locally build image
+
+```
+docker tag dnd-docker us-central1-docker.pkg.dev/encoded-silo-401007/dnd-repo/dnd-docker:1
+```
+
+Push the image:
+
+```
+docker push us-central1-docker.pkg.dev/encoded-silo-401007/dnd-repo/dnd-docker:1
+```
