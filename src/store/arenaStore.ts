@@ -22,30 +22,41 @@ type Actions = {
   // Entities Actions
   setEntities: (entities: Entity[]) => void;
   spawnMonster: (monster: Monster) => void;
+  setReds: (names: string[]) => void;
+  setBlues: (names: string[]) => void;
 };
 
-export const useStore = create<{ arena: Arena; entities: Entity[] } & Actions>(
-  (set) => ({
-    arena: {
-      combatants: {},
-      queue: [],
-      round: 1,
-    },
-    entities: [],
-    nextCombatant: () =>
-      set((state) => ({ arena: advanceQueueInArena(state.arena) })),
-    initArena: (reds: Entity[], blues: Entity[]) =>
-      set(() => ({ arena: initArena(reds, blues) })),
-    attack: (arena: Arena, defenderId: string, attackAction: AttackAction) => {
-      const [newArena, result] = attack(arena, defenderId, attackAction);
-      set(() => ({ arena: newArena }));
-      return result;
-    },
-    setEntities: (entities: Entity[]) => set(() => ({ entities })),
-    spawnMonster: (monster: Monster) =>
-      set(({ entities }) => {
-        const newMonster = spawnMonster(monster, "_" + entities.length);
-        return { entities: [...entities, newMonster] };
-      }),
-  })
-);
+type State = {
+  arena: Arena;
+  entities: Entity[];
+  blues: string[];
+  reds: string[];
+};
+
+export const useStore = create<State & Actions>((set) => ({
+  arena: {
+    combatants: {},
+    queue: [],
+    round: 1,
+  },
+  entities: [],
+  blues: [],
+  reds: [],
+  nextCombatant: () =>
+    set((state) => ({ arena: advanceQueueInArena(state.arena) })),
+  initArena: (reds: Entity[], blues: Entity[]) =>
+    set(() => ({ arena: initArena(reds, blues) })),
+  attack: (arena: Arena, defenderId: string, attackAction: AttackAction) => {
+    const [newArena, result] = attack(arena, defenderId, attackAction);
+    set(() => ({ arena: newArena }));
+    return result;
+  },
+  setEntities: (entities: Entity[]) => set(() => ({ entities })),
+  spawnMonster: (monster: Monster) =>
+    set(({ entities }) => {
+      const newMonster = spawnMonster(monster, "_" + entities.length);
+      return { entities: [...entities, newMonster] };
+    }),
+  setBlues: (names: string[]) => set(() => ({ blues: names })),
+  setReds: (names: string[]) => set(() => ({ reds: names })),
+}));
